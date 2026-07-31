@@ -3,58 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML App & Game Emulator</title>
+  <title>HTML Studio & Emulator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #fff; height: 100vh; display: flex; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #fff; height: 100vh; overflow: hidden; }
     
-    /* Sidebar Layout */
-    .sidebar { width: 320px; background: #1e1e1e; border-right: 1px solid #333; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-    .sidebar h2 { font-size: 1.2rem; color: #ffca28; }
+    /* Auth Modal */
+    .auth-overlay { position: fixed; inset: 0; background: #121212; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .auth-card { background: #1e1e1e; padding: 30px; border-radius: 8px; width: 100%; max-width: 380px; border: 1px solid #333; text-align: center; }
+    .auth-card h2 { margin-bottom: 20px; color: #ffca28; }
+    .auth-card input { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
+    .auth-card button { width: 100%; padding: 10px; background: #ffca28; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
+    .auth-card button.secondary { background: transparent; color: #aaa; border: 1px solid #444; }
+
+    /* App Workspace */
+    .app-container { display: flex; height: 100vh; width: 100vw; }
+    .sidebar { width: 360px; background: #1e1e1e; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+    .sidebar h3 { font-size: 1rem; color: #ffca28; margin-top: 5px; }
+
+    /* Controls & Tabs */
+    .tab-buttons { display: flex; gap: 8px; }
+    .tab-btn { flex: 1; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; cursor: pointer; border-radius: 4px; }
+    .tab-btn.active { background: #ffca28; color: #000; font-weight: bold; border-color: #ffca28; }
     
-    /* Upload Box */
-    .upload-box { border: 2px dashed #444; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
-    .upload-box:hover { border-color: #ffca28; background: #252525; }
-    input[type="file"] { display: none; }
+    .panel { display: none; flex-direction: column; gap: 10px; }
+    .panel.active { display: flex; }
 
-    /* App List */
-    .app-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .app-item { background: #2a2a2a; padding: 12px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-    .app-item:hover { background: #383838; }
-    .app-item.active { border-left: 4px solid #ffca28; background: #333; }
+    /* Upload Inputs */
+    .upload-box { border: 2px dashed #444; border-radius: 6px; padding: 15px; text-align: center; cursor: pointer; background: #252525; }
+    .upload-box:hover { border-color: #ffca28; }
+    textarea { width: 100%; height: 200px; background: #181818; color: #00ff66; font-family: monospace; padding: 10px; border: 1px solid #333; border-radius: 4px; resize: vertical; }
 
-    /* Emulator Display Area */
+    /* File List */
+    .file-tree { background: #181818; border-radius: 4px; padding: 8px; max-height: 150px; overflow-y: auto; font-size: 0.85rem; font-family: monospace; }
+    .file-item { padding: 4px 6px; color: #ccc; }
+
+    /* Preview Viewport */
     .viewport { flex: 1; display: flex; flex-direction: column; background: #000; }
     .toolbar { background: #1e1e1e; padding: 10px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
     iframe { width: 100%; height: 100%; border: none; background: #fff; }
+    
+    .user-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #333; font-size: 0.85rem; }
+    .btn-logout { background: #d32f2f; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <h2>HTML Playground</h2>
-    
-    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-      <p>📁 Click to upload <code>.html</code> file</p>
-      <input type="file" id="fileInput" accept=".html">
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-card">
+      <h2 id="authTitle">Sign In</h2>
+      <input type="email" id="authEmail" placeholder="Email Address">
+      <input type="password" id="authPassword" placeholder="Password">
+      <button id="btnLogin">Sign In</button>
+      <button id="btnSignup" class="secondary">Create Account</button>
+      <p id="authError" style="color: #ff5252; font-size: 0.8rem; margin-top: 10px;"></p>
     </div>
-
-    <h3>Uploaded Games & Apps</h3>
-    <div class="app-list" id="appList">
-      </div>
   </div>
 
-  <div class="viewport">
-    <div class="toolbar">
-      <span id="currentTitle">Select or upload a file to run...</span>
-      <button onclick="reloadEmulator()" style="padding: 5px 10px; cursor: pointer;">🔄 Reload</button>
+  <div class="app-container">
+    <div class="sidebar">
+      <div class="user-bar">
+        <span id="userDisplay">Loading user...</span>
+        <button class="btn-logout" id="btnLogout">Logout</button>
+      </div>
+
+      <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('paste')">Paste Code</button>
+        <button class="tab-btn" onclick="switchTab('folder')">Folder Upload</button>
+      </div>
+
+      <div id="panelPaste" class="panel active">
+        <h3>Paste Single HTML Code</h3>
+        <textarea id="codeEditor" placeholder="<!DOCTYPE html>&#10;<html>&#10;<body>&#10;<h1>Hello World</h1>&#10;</body>&#10;</html>"></textarea>
+        <button onclick="runPastedCode()" style="padding: 10px; background: #ffca28; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">▶️ Run Code</button>
+      </div>
+
+      <div id="panelFolder" class="panel">
+        <h3>Upload Entire Folder / Project</h3>
+        <div class="upload-box" onclick="document.getElementById('folderInput').click()">
+          📁 Select Project Folder
+          <input type="file" id="folderInput" webkitdirectory directory multiple style="display:none;">
+        </div>
+
+        <h3>Loaded Files</h3>
+        <div class="file-tree" id="fileTree">No folder loaded.</div>
+        <button onclick="runFolderProject()" style="padding: 10px; background: #4caf50; color: #fff; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">🚀 Launch Project</button>
+      </div>
     </div>
-    <iframe id="emulator" sandbox="allow-scripts allow-same-origin allow-modals allow-forms"></iframe>
+
+    <div class="viewport">
+      <div class="toolbar">
+        <span id="previewStatus">Status: Idle</span>
+        <button onclick="reloadPreview()" style="padding: 5px 12px; cursor: pointer;">🔄 Refresh</button>
+      </div>
+      <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin allow-modals allow-forms"></iframe>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } 
+      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     // YOUR FIREBASE CONFIGURATION
     const firebaseConfig = {
@@ -63,90 +112,137 @@
       projectId: "emulator-35ec5",
       storageBucket: "emulator-35ec5.firebasestorage.app",
       messagingSenderId: "358755516525",
-      appId: "1:358755516525:web:625eaa8b32199563b4bf64",
-      measurementId: "G-TB9F8QHG12"
+      appId: "1:358755516525:web:625eaa8b32199563b4bf64"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const storage = getStorage(app);
+    const auth = getAuth(app);
 
-    const fileInput = document.getElementById('fileInput');
-    const appList = document.getElementById('appList');
-    const emulator = document.getElementById('emulator');
-    const currentTitle = document.getElementById('currentTitle');
+    // Auth Elements
+    const authOverlay = document.getElementById('authOverlay');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authError = document.getElementById('authError');
+    const userDisplay = document.getElementById('userDisplay');
 
-    // Load existing uploaded files from Storage
-    async function loadFiles() {
-      appList.innerHTML = '<p style="font-size:0.8rem; color:#888;">Loading files...</p>';
-      const storageRef = ref(storage, 'html_apps/');
-      
-      try {
-        const result = await listAll(storageRef);
-        appList.innerHTML = '';
-
-        if (result.items.length === 0) {
-          appList.innerHTML = '<p style="font-size:0.8rem; color:#888;">No files uploaded yet.</p>';
-          return;
-        }
-
-        for (const itemRef of result.items) {
-          const url = await getDownloadURL(itemRef);
-          createAppItem(itemRef.name, url);
-        }
-      } catch (err) {
-        console.error("Error loading files: ", err);
-      }
-    }
-
-    // Render an app item to the side list
-    function createAppItem(fileName, url) {
-      const item = document.createElement('div');
-      item.className = 'app-item';
-      item.innerText = fileName;
-      item.onclick = () => launchApp(fileName, url, item);
-      appList.appendChild(item);
-    }
-
-    // Run selected HTML in the iframe sandbox
-    function launchApp(fileName, url, element) {
-      document.querySelectorAll('.app-item').forEach(el => el.classList.remove('active'));
-      if(element) element.classList.add('active');
-      
-      currentTitle.innerText = `Running: ${fileName}`;
-      emulator.src = url;
-    }
-
-    // Upload new HTML file to Firebase Storage
-    fileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      if (!file.name.endsWith('.html')) {
-        alert('Please upload a valid .html file!');
-        return;
-      }
-
-      const metadata = { contentType: 'text/html' };
-      const fileRef = ref(storage, `html_apps/${Date.now()}_${file.name}`);
-
-      try {
-        currentTitle.innerText = 'Uploading file...';
-        await uploadBytes(fileRef, file, metadata);
-        
-        currentTitle.innerText = 'Upload successful!';
-        loadFiles();
-      } catch (err) {
-        console.error("Upload failed:", err);
-        alert("Upload failed. Make sure Storage is enabled in Firebase Console.");
+    // Handle Auth State
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        authOverlay.style.display = 'none';
+        userDisplay.innerText = user.email;
+      } else {
+        authOverlay.style.display = 'flex';
       }
     });
 
-    window.reloadEmulator = () => {
-      emulator.contentWindow.location.reload();
+    // Login
+    document.getElementById('btnLogin').onclick = async () => {
+      try {
+        await signInWithEmailAndPassword(auth, authEmail.value, authPassword.value);
+        authError.innerText = '';
+      } catch (err) {
+        authError.innerText = err.message;
+      }
     };
 
-    loadFiles();
+    // Sign Up
+    document.getElementById('btnSignup').onclick = async () => {
+      try {
+        await createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value);
+        authError.innerText = '';
+      } catch (err) {
+        authError.innerText = err.message;
+      }
+    };
+
+    // Logout
+    document.getElementById('btnLogout').onclick = () => signOut(auth);
+
+    // Virtual File System State
+    let fileMap = {};
+    const previewFrame = document.getElementById('previewFrame');
+    const previewStatus = document.getElementById('previewStatus');
+
+    // Switch Tabs
+    window.switchTab = (tab) => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      
+      if (tab === 'paste') {
+        event.target.classList.add('active');
+        document.getElementById('panelPaste').classList.add('active');
+      } else {
+        event.target.classList.add('active');
+        document.getElementById('panelFolder').classList.add('active');
+      }
+    };
+
+    // 1. Run Pasted Raw Code
+    window.runPastedCode = () => {
+      const code = document.getElementById('codeEditor').value;
+      const blob = new Blob([code], { type: 'text/html' });
+      previewFrame.src = URL.createObjectURL(blob);
+      previewStatus.innerText = "Status: Running Pasted Code";
+    };
+
+    // 2. Multi-file & Folder Upload Handler
+    document.getElementById('folderInput').addEventListener('change', (e) => {
+      const files = e.target.files;
+      const fileTree = document.getElementById('fileTree');
+      fileTree.innerHTML = '';
+      fileMap = {};
+
+      if (files.length === 0) return;
+
+      Array.from(files).forEach(file => {
+        // Normalize file paths
+        const path = file.webkitRelativePath.split('/').slice(1).join('/');
+        fileMap[path] = file;
+
+        const div = document.createElement('div');
+        div.className = 'file-item';
+        div.innerText = `📄 ${path}`;
+        fileTree.appendChild(div);
+      });
+
+      previewStatus.innerText = `Loaded ${files.length} files into memory.`;
+    });
+
+    // 3. Launch Multi-File Web Project
+    window.runFolderProject = async () => {
+      let entryPoint = fileMap['index.html'];
+      
+      // If index.html isn't root, look for any .html file
+      if (!entryPoint) {
+        const key = Object.keys(fileMap).find(k => k.endsWith('.html'));
+        if (key) entryPoint = fileMap[key];
+      }
+
+      if (!entryPoint) {
+        alert("No entry html file (e.g., index.html) found in this folder!");
+        return;
+      }
+
+      // Read index.html and link relative assets via Blob URLs
+      let content = await entryPoint.text();
+
+      for (const [path, file] of Object.entries(fileMap)) {
+        if (path !== entryPoint.name) {
+          const blobUrl = URL.createObjectURL(file);
+          // Replace local asset references with in-memory Blob URLs
+          content = content.replaceAll(`"${path}"`, `"${blobUrl}"`);
+          content = content.replaceAll(`'${path}'`, `'${blobUrl}'`);
+        }
+      }
+
+      const finalBlob = new Blob([content], { type: 'text/html' });
+      previewFrame.src = URL.createObjectURL(finalBlob);
+      previewStatus.innerText = `Status: Running ${entryPoint.name}`;
+    };
+
+    window.reloadPreview = () => {
+      previewFrame.contentWindow.location.reload();
+    };
   </script>
 </body>
 </html>
