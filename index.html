@@ -19,26 +19,35 @@
     body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* AUTH OVERLAY */
-    .auth-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; align-items: center; justify-content: center; }
-    .auth-card { background: var(--card-bg); padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
-    .auth-card h1 { margin-bottom: 10px; color: var(--accent); }
-    .auth-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem; }
-    .btn-auth { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; transition: 0.2s; }
-    .btn-google { background: #fff; color: #333; }
+    .auth-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    .auth-card { background: var(--card-bg); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .auth-card h1 { margin-bottom: 6px; color: var(--accent); }
+    .auth-card p { color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem; }
+    
+    .auth-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+    .auth-form input { width: 100%; padding: 12px; background: #121216; border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
+    
+    .btn-auth { width: 100%; padding: 12px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.95rem; transition: 0.2s; }
+    .btn-primary-auth { background: var(--accent); color: #fff; }
+    .btn-primary-auth:hover { background: var(--accent-hover); }
+    .btn-google { background: #fff; color: #333; margin-top: 10px; }
     .btn-google:hover { background: #e6e6e6; }
-    .btn-guest { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-guest { background: transparent; color: var(--text-muted); border: 1px solid var(--border); margin-top: 8px; }
     .btn-guest:hover { background: var(--border); color: #fff; }
+
+    .toggle-link { color: var(--accent); cursor: pointer; font-size: 0.85rem; text-decoration: underline; margin-top: 10px; display: inline-block; }
+    .auth-error { color: #ff5252; font-size: 0.8rem; margin-top: 8px; min-height: 18px; }
 
     /* NAVBAR */
     header { height: 60px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-    .logo { font-weight: bold; font-size: 1.2rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .logo { font-weight: bold; font-size: 1.2rem; color: var(--accent); }
     nav { display: flex; gap: 10px; }
     .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
     .nav-btn.active, .nav-btn:hover { color: var(--text); background: var(--border); }
     .user-pill { display: flex; align-items: center; gap: 10px; }
     .avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--border); }
 
-    /* MAIN VIEW */
+    /* MAIN VIEWS */
     main { flex: 1; overflow: hidden; position: relative; }
     .view { display: none; height: 100%; overflow-y: auto; padding: 20px; }
     .view.active { display: block; }
@@ -52,17 +61,16 @@
     .card-body p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px; }
     .card-preview { height: 200px; width: 100%; border: none; background: #fff; border-radius: 6px; }
 
-    /* SHORTS FEED (YT SHORTS STYLE) */
+    /* SHORTS FEED */
     #viewShorts { padding: 0; scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
     .short-container { height: 100%; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; display: flex; justify-content: center; align-items: center; position: relative; background: #000; }
     .short-card { width: 100%; max-width: 450px; height: 90%; background: var(--card-bg); border-radius: 12px; overflow: hidden; position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); }
     .short-frame { flex: 1; width: 100%; border: none; background: #fff; }
     .short-overlay { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 20px; color: #fff; pointer-events: none; }
 
-    /* UPLOAD & EDITOR FORM */
+    /* UPLOAD FORM */
     .editor-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
-    input, textarea { width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
-    textarea.code-input { font-family: monospace; height: 250px; background: #121216; color: #a6e22e; }
+    textarea.code-input { font-family: monospace; height: 250px; background: #121216; color: #a6e22e; width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
     .preview-box { height: 250px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 
     /* PROFILE VIEW */
@@ -71,7 +79,6 @@
     .file-upload-btn { position: relative; overflow: hidden; display: inline-block; background: var(--border); padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; font-size: 0.85rem; }
     .file-upload-btn input { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
 
-    /* BUTTONS */
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
     .btn-primary:hover { background: var(--accent-hover); }
     .guest-banner { background: #d63031; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: bold; display: none; }
@@ -79,15 +86,35 @@
 </head>
 <body>
 
-  <div id="guestBanner" class="guest-banner">👀 Viewing as Guest (Upload features disabled)</div>
+  <div id="guestBanner" class="guest-banner">👀 Viewing in Guest Mode (Uploading disabled)</div>
 
   <div class="auth-overlay" id="authModal">
     <div class="auth-card">
       <h1>🚀 CodeShare</h1>
-      <p>Share, explore, and run HTML code snippets live.</p>
+      <p id="authSubtitle">Sign in to your account</p>
+
+      <div id="loginForm" class="auth-form">
+        <input type="email" id="loginEmail" placeholder="Email Address">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button class="btn-auth btn-primary-auth" id="btnLoginEmail">Sign In</button>
+        <span class="toggle-link" onclick="toggleAuthMode('signup')">Don't have an account? Sign Up</span>
+      </div>
+
+      <div id="signupForm" class="auth-form" style="display: none;">
+        <input type="text" id="signupName" placeholder="Full Name">
+        <input type="email" id="signupEmail" placeholder="Email Address">
+        <input type="password" id="signupPassword" placeholder="Password (min 6 characters)">
+        <button class="btn-auth btn-primary-auth" id="btnSignupEmail">Create Account</button>
+        <span class="toggle-link" onclick="toggleAuthMode('login')">Already have an account? Sign In</span>
+      </div>
+
+      <div class="auth-error" id="authError"></div>
+
+      <div style="margin: 10px 0; border-bottom: 1px solid var(--border);"></div>
+
       <button class="btn-auth btn-google" id="btnLoginGoogle">
         <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        Continue with Google
+        Sign in with Google
       </button>
       <button class="btn-auth btn-guest" id="btnLoginGuest">Continue as Guest</button>
     </div>
@@ -122,14 +149,14 @@
 
     <div id="viewUpload" class="view">
       <div class="editor-container">
-        <h2>Create & Share Code</h2>
-        <input type="text" id="postTitle" placeholder="Project Title...">
-        <textarea id="postDesc" placeholder="Brief Description..." style="height: 70px;"></textarea>
+        <h2>Create & Share Project</h2>
+        <input type="text" id="postTitle" placeholder="Project Title..." style="width:100%; padding:12px; background:var(--card-bg); border:1px solid var(--border); border-radius:6px; color:#fff;">
+        <textarea id="postDesc" placeholder="Brief Description..." style="width:100%; height: 70px; padding:12px; background:var(--card-bg); border:1px solid var(--border); border-radius:6px; color:#fff;"></textarea>
         
         <label style="font-weight: bold; color: var(--text-muted);">HTML/JS/CSS Code:</label>
         <textarea id="postCode" class="code-input" placeholder="<h1>Hello World</h1>"></textarea>
         
-        <button class="btn-primary" onclick="updatePreview()">⚡ Test & Preview Code</button>
+        <button class="btn-primary" onclick="updatePreview()">⚡ Test Code Preview</button>
         
         <div class="preview-box">
           <iframe id="editorPreview" class="short-frame" sandbox="allow-scripts allow-same-origin"></iframe>
@@ -148,8 +175,8 @@
           <input type="file" id="avatarInput" accept="image/*">
         </div>
 
-        <input type="text" id="profileName" placeholder="Your Display Name" style="margin-bottom: 10px;">
-        <textarea id="profileBio" placeholder="Tell us about yourself..." style="height: 80px; margin-bottom: 15px;"></textarea>
+        <input type="text" id="profileName" placeholder="Your Display Name" style="width:100%; padding:10px; margin-bottom:10px; background:#121216; border:1px solid var(--border); border-radius:6px; color:#fff;">
+        <textarea id="profileBio" placeholder="Tell us about yourself..." style="width:100%; height: 80px; padding:10px; margin-bottom:15px; background:#121216; border:1px solid var(--border); border-radius:6px; color:#fff;"></textarea>
         
         <button class="btn-primary" id="btnSaveProfile" onclick="saveProfile()">Save Profile</button>
       </div>
@@ -158,10 +185,9 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // 1. YOUR FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyDHalkE8dB7TycHSrBrkZ65fZ_G6aE465c",
       authDomain: "emulator-35ec5.firebaseapp.com",
@@ -175,38 +201,97 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Global App State
     let currentUser = null;
     let isGuestMode = false;
     let base64Avatar = "";
 
-    // DOM Elements
     const authModal = document.getElementById('authModal');
+    const authError = document.getElementById('authError');
     const guestBanner = document.getElementById('guestBanner');
     const navAvatar = document.getElementById('navAvatar');
     const profileAvatar = document.getElementById('profileAvatar');
     const profileName = document.getElementById('profileName');
     const profileBio = document.getElementById('profileBio');
 
-    // Authentication Listeners
-    document.getElementById('btnLoginGoogle').onclick = async () => {
-      const provider = new GoogleAuthProvider();
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (err) { alert(err.message); }
+    // UI Auth Mode Switcher
+    window.toggleAuthMode = (mode) => {
+      authError.innerText = "";
+      if (mode === 'signup') {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('signupForm').style.display = 'flex';
+        document.getElementById('authSubtitle').innerText = "Create a new account";
+      } else {
+        document.getElementById('signupForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'flex';
+        document.getElementById('authSubtitle').innerText = "Sign in to your account";
+      }
     };
 
+    // 1. Email Sign In
+    document.getElementById('btnLoginEmail').onclick = async () => {
+      authError.innerText = "";
+      const email = document.getElementById('loginEmail').value;
+      const pass = document.getElementById('loginPassword').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        authError.innerText = err.message.replace("Firebase: ", "");
+      }
+    };
+
+    // 2. Email Sign Up
+    document.getElementById('btnSignupEmail').onclick = async () => {
+      authError.innerText = "";
+      const name = document.getElementById('signupName').value;
+      const email = document.getElementById('signupEmail').value;
+      const pass = document.getElementById('signupPassword').value;
+
+      if(!name) return authError.innerText = "Please enter your full name.";
+
+      try {
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(res.user, { displayName: name });
+        await setDoc(doc(db, "users", res.user.uid), { displayName: name, bio: "", avatarBase64: "" });
+      } catch (err) {
+        authError.innerText = err.message.replace("Firebase: ", "");
+      }
+    };
+
+    // 3. Google Sign In
+    document.getElementById('btnLoginGoogle').onclick = async () => {
+      authError.innerText = "";
+      const provider = new GoogleAuthProvider();
+      try {
+        const result = await signInWithPopup(auth, provider);
+        // Ensure user entry exists in Firestore
+        const userRef = doc(db, "users", result.user.uid);
+        const snap = await getDoc(userRef);
+        if(!snap.exists()) {
+          await setDoc(userRef, {
+            displayName: result.user.displayName,
+            bio: "",
+            avatarBase64: result.user.photoURL
+          });
+        }
+      } catch (err) {
+        authError.innerText = err.message.replace("Firebase: ", "");
+      }
+    };
+
+    // 4. Guest Login
     document.getElementById('btnLoginGuest').onclick = () => {
       isGuestMode = true;
       currentUser = { uid: "guest", displayName: "Guest User", photoURL: "https://via.placeholder.com/100" };
       setupUIForUser();
     };
 
+    // Logout
     document.getElementById('btnLogout').onclick = () => {
       signOut(auth);
       location.reload();
     };
 
+    // Main Auth Listener
     onAuthStateChanged(auth, async (user) => {
       if (user && !isGuestMode) {
         currentUser = user;
@@ -220,41 +305,44 @@
       if (isGuestMode) {
         guestBanner.style.display = 'block';
         document.getElementById('btnPublish').disabled = true;
-        document.getElementById('btnPublish').innerText = "Publishing Disabled in Guest Mode";
+        document.getElementById('btnPublish').innerText = "Disabled in Guest Mode";
         document.getElementById('btnSaveProfile').disabled = true;
         document.getElementById('avatarUploadContainer').style.display = 'none';
       }
+      
       navAvatar.src = base64Avatar || currentUser.photoURL || "https://via.placeholder.com/32";
       loadHomeFeed();
       loadShortsFeed();
     }
 
-    // BASE64 IMAGE ENCODING FOR PROFILE
+    // Base64 Photo Processing
     document.getElementById('avatarInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        base64Avatar = reader.result; // Base64 Encoded Data String
+        base64Avatar = reader.result;
         profileAvatar.src = base64Avatar;
         navAvatar.src = base64Avatar;
       };
       reader.readAsDataURL(file);
     });
 
-    // PROFILE MANAGEMENT (Firestore)
+    // Firestore Profile Sync
     async function loadUserProfile() {
       if (!currentUser || isGuestMode) return;
       const ref = doc(db, "users", currentUser.uid);
       const snap = await getDoc(ref);
       if (snap.exists()) {
         const data = snap.data();
-        profileName.value = data.displayName || "";
+        profileName.value = data.displayName || currentUser.displayName || "";
         profileBio.value = data.bio || "";
         if (data.avatarBase64) {
           base64Avatar = data.avatarBase64;
           profileAvatar.src = base64Avatar;
+        } else if (currentUser.photoURL) {
+          profileAvatar.src = currentUser.photoURL;
         }
       } else {
         profileName.value = currentUser.displayName || "";
@@ -271,7 +359,7 @@
       alert("Profile Saved!");
     };
 
-    // TAB NAVIGATION
+    // Nav Switcher
     window.switchTab = (tabName) => {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -280,7 +368,7 @@
       event.target.classList.add('active');
     };
 
-    // LIVE EDITOR PREVIEW
+    // Editor Live Preview
     window.updatePreview = () => {
       const code = document.getElementById('postCode').value;
       const iframe = document.getElementById('editorPreview');
@@ -288,7 +376,7 @@
       iframe.src = URL.createObjectURL(blob);
     };
 
-    // PUBLISH PROJECT TO FIRESTORE
+    // Publish Code Project
     window.publishProject = async () => {
       if (isGuestMode) return alert("Guest users cannot upload projects!");
       const title = document.getElementById('postTitle').value;
@@ -312,7 +400,7 @@
       loadShortsFeed();
     };
 
-    // LOAD HOME GRID FEED
+    // Load Grid View
     async function loadHomeFeed() {
       const grid = document.getElementById('homeFeedGrid');
       grid.innerHTML = "";
@@ -329,16 +417,13 @@
           const card = document.createElement('div');
           card.className = "project-card";
           
-          // Create Blob URL for iframe frame sandbox
           const blob = new Blob([data.code], { type: 'text/html' });
           const blobUrl = URL.createObjectURL(blob);
 
           card.innerHTML = `
             <div class="card-header">
               <img src="${data.authorAvatar}" class="avatar-sm">
-              <div>
-                <strong>${data.author}</strong>
-              </div>
+              <div><strong>${data.author}</strong></div>
             </div>
             <div class="card-body">
               <h3>${data.title}</h3>
@@ -351,7 +436,7 @@
       } catch(e) { grid.innerHTML = "Error loading feed."; }
     }
 
-    // LOAD YOUTUBE SHORTS STYLE FEED
+    // Load Shorts Feed
     async function loadShortsFeed() {
       const container = document.getElementById('shortsContainer');
       container.innerHTML = "";
