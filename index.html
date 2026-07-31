@@ -1,111 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML Studio & Emulator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeShare Studio</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #fff; height: 100vh; overflow: hidden; }
-    
-    /* Auth Modal */
-    .auth-overlay { position: fixed; inset: 0; background: #121212; display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .auth-card { background: #1e1e1e; padding: 30px; border-radius: 8px; width: 100%; max-width: 380px; border: 1px solid #333; text-align: center; }
-    .auth-card h2 { margin-bottom: 20px; color: #ffca28; }
-    .auth-card input { width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: #fff; }
-    .auth-card button { width: 100%; padding: 10px; background: #ffca28; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; margin-bottom: 10px; }
-    .auth-card button.secondary { background: transparent; color: #aaa; border: 1px solid #444; }
+    :root {
+      --bg: #0f0f12;
+      --card-bg: #1a1a24;
+      --accent: #6c5ce7;
+      --accent-hover: #5b4bc4;
+      --text: #f1f2f6;
+      --text-muted: #a4b0be;
+      --border: #2f3542;
+    }
 
-    /* App Workspace */
-    .app-container { display: flex; height: 100vh; width: 100vw; }
-    .sidebar { width: 360px; background: #1e1e1e; border-right: 1px solid #333; padding: 15px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-    .sidebar h3 { font-size: 1rem; color: #ffca28; margin-top: 5px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* Controls & Tabs */
-    .tab-buttons { display: flex; gap: 8px; }
-    .tab-btn { flex: 1; padding: 8px; background: #2a2a2a; border: 1px solid #444; color: #fff; cursor: pointer; border-radius: 4px; }
-    .tab-btn.active { background: #ffca28; color: #000; font-weight: bold; border-color: #ffca28; }
-    
-    .panel { display: none; flex-direction: column; gap: 10px; }
-    .panel.active { display: flex; }
+    /* AUTH OVERLAY */
+    .auth-overlay { position: fixed; inset: 0; background: #000; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+    .auth-card { background: var(--card-bg); padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border); }
+    .auth-card h1 { margin-bottom: 10px; color: var(--accent); }
+    .auth-card p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem; }
+    .btn-auth { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; transition: 0.2s; }
+    .btn-google { background: #fff; color: #333; }
+    .btn-google:hover { background: #e6e6e6; }
+    .btn-guest { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-guest:hover { background: var(--border); color: #fff; }
 
-    /* Upload Inputs */
-    .upload-box { border: 2px dashed #444; border-radius: 6px; padding: 15px; text-align: center; cursor: pointer; background: #252525; }
-    .upload-box:hover { border-color: #ffca28; }
-    textarea { width: 100%; height: 200px; background: #181818; color: #00ff66; font-family: monospace; padding: 10px; border: 1px solid #333; border-radius: 4px; resize: vertical; }
+    /* NAVBAR */
+    header { height: 60px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+    .logo { font-weight: bold; font-size: 1.2rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    nav { display: flex; gap: 10px; }
+    .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .nav-btn.active, .nav-btn:hover { color: var(--text); background: var(--border); }
+    .user-pill { display: flex; align-items: center; gap: 10px; }
+    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--border); }
 
-    /* File List */
-    .file-tree { background: #181818; border-radius: 4px; padding: 8px; max-height: 150px; overflow-y: auto; font-size: 0.85rem; font-family: monospace; }
-    .file-item { padding: 4px 6px; color: #ccc; }
+    /* MAIN VIEW */
+    main { flex: 1; overflow: hidden; position: relative; }
+    .view { display: none; height: 100%; overflow-y: auto; padding: 20px; }
+    .view.active { display: block; }
 
-    /* Preview Viewport */
-    .viewport { flex: 1; display: flex; flex-direction: column; background: #000; }
-    .toolbar { background: #1e1e1e; padding: 10px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-    iframe { width: 100%; height: 100%; border: none; background: #fff; }
-    
-    .user-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #333; font-size: 0.85rem; }
-    .btn-logout { background: #d32f2f; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+    /* GRID FEED (HOME) */
+    .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+    .project-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+    .card-header { padding: 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+    .card-body { padding: 15px; flex: 1; }
+    .card-body h3 { margin-bottom: 6px; }
+    .card-body p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px; }
+    .card-preview { height: 200px; width: 100%; border: none; background: #fff; border-radius: 6px; }
+
+    /* SHORTS FEED (YT SHORTS STYLE) */
+    #viewShorts { padding: 0; scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
+    .short-container { height: 100%; width: 100%; scroll-snap-align: start; scroll-snap-stop: always; display: flex; justify-content: center; align-items: center; position: relative; background: #000; }
+    .short-card { width: 100%; max-width: 450px; height: 90%; background: var(--card-bg); border-radius: 12px; overflow: hidden; position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); }
+    .short-frame { flex: 1; width: 100%; border: none; background: #fff; }
+    .short-overlay { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 20px; color: #fff; pointer-events: none; }
+
+    /* UPLOAD & EDITOR FORM */
+    .editor-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+    input, textarea { width: 100%; padding: 12px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
+    textarea.code-input { font-family: monospace; height: 250px; background: #121216; color: #a6e22e; }
+    .preview-box { height: 250px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+
+    /* PROFILE VIEW */
+    .profile-card { max-width: 500px; margin: 20px auto; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; text-align: center; }
+    .avatar-lg { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--accent); }
+    .file-upload-btn { position: relative; overflow: hidden; display: inline-block; background: var(--border); padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; font-size: 0.85rem; }
+    .file-upload-btn input { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+    /* BUTTONS */
+    .btn-primary { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .guest-banner { background: #d63031; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: bold; display: none; }
   </style>
 </head>
 <body>
 
-  <div class="auth-overlay" id="authOverlay">
+  <div id="guestBanner" class="guest-banner">👀 Viewing as Guest (Upload features disabled)</div>
+
+  <div class="auth-overlay" id="authModal">
     <div class="auth-card">
-      <h2 id="authTitle">Sign In</h2>
-      <input type="email" id="authEmail" placeholder="Email Address">
-      <input type="password" id="authPassword" placeholder="Password">
-      <button id="btnLogin">Sign In</button>
-      <button id="btnSignup" class="secondary">Create Account</button>
-      <p id="authError" style="color: #ff5252; font-size: 0.8rem; margin-top: 10px;"></p>
+      <h1>🚀 CodeShare</h1>
+      <p>Share, explore, and run HTML code snippets live.</p>
+      <button class="btn-auth btn-google" id="btnLoginGoogle">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        Continue with Google
+      </button>
+      <button class="btn-auth btn-guest" id="btnLoginGuest">Continue as Guest</button>
     </div>
   </div>
 
-  <div class="app-container">
-    <div class="sidebar">
-      <div class="user-bar">
-        <span id="userDisplay">Loading user...</span>
-        <button class="btn-logout" id="btnLogout">Logout</button>
-      </div>
+  <header>
+    <div class="logo">💻 CodeShare</div>
+    <nav>
+      <button class="nav-btn active" onclick="switchTab('Home')">Home</button>
+      <button class="nav-btn" onclick="switchTab('Shorts')">Shorts Feed</button>
+      <button class="nav-btn" onclick="switchTab('Upload')">Create</button>
+      <button class="nav-btn" onclick="switchTab('Profile')">Profile</button>
+    </nav>
+    <div class="user-pill">
+      <img id="navAvatar" class="avatar-sm" src="https://via.placeholder.com/32" alt="Avatar">
+      <button class="nav-btn" id="btnLogout">Logout</button>
+    </div>
+  </header>
 
-      <div class="tab-buttons">
-        <button class="tab-btn active" onclick="switchTab('paste')">Paste Code</button>
-        <button class="tab-btn" onclick="switchTab('folder')">Folder Upload</button>
+  <main>
+    <div id="viewHome" class="view active">
+      <div class="feed-grid" id="homeFeedGrid">
+        <p style="color:var(--text-muted)">Loading feed...</p>
       </div>
+    </div>
 
-      <div id="panelPaste" class="panel active">
-        <h3>Paste Single HTML Code</h3>
-        <textarea id="codeEditor" placeholder="<!DOCTYPE html>&#10;<html>&#10;<body>&#10;<h1>Hello World</h1>&#10;</body>&#10;</html>"></textarea>
-        <button onclick="runPastedCode()" style="padding: 10px; background: #ffca28; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">▶️ Run Code</button>
+    <div id="viewShorts" class="view">
+      <div id="shortsContainer" style="height: 100%;">
+        <p style="text-align: center; padding-top: 40px; color:var(--text-muted)">Loading shorts...</p>
       </div>
+    </div>
 
-      <div id="panelFolder" class="panel">
-        <h3>Upload Entire Folder / Project</h3>
-        <div class="upload-box" onclick="document.getElementById('folderInput').click()">
-          📁 Select Project Folder
-          <input type="file" id="folderInput" webkitdirectory directory multiple style="display:none;">
+    <div id="viewUpload" class="view">
+      <div class="editor-container">
+        <h2>Create & Share Code</h2>
+        <input type="text" id="postTitle" placeholder="Project Title...">
+        <textarea id="postDesc" placeholder="Brief Description..." style="height: 70px;"></textarea>
+        
+        <label style="font-weight: bold; color: var(--text-muted);">HTML/JS/CSS Code:</label>
+        <textarea id="postCode" class="code-input" placeholder="<h1>Hello World</h1>"></textarea>
+        
+        <button class="btn-primary" onclick="updatePreview()">⚡ Test & Preview Code</button>
+        
+        <div class="preview-box">
+          <iframe id="editorPreview" class="short-frame" sandbox="allow-scripts allow-same-origin"></iframe>
         </div>
 
-        <h3>Loaded Files</h3>
-        <div class="file-tree" id="fileTree">No folder loaded.</div>
-        <button onclick="runFolderProject()" style="padding: 10px; background: #4caf50; color: #fff; border: none; font-weight: bold; cursor: pointer; border-radius: 4px;">🚀 Launch Project</button>
+        <button class="btn-primary" id="btnPublish" onclick="publishProject()">🚀 Publish to Feed</button>
       </div>
     </div>
 
-    <div class="viewport">
-      <div class="toolbar">
-        <span id="previewStatus">Status: Idle</span>
-        <button onclick="reloadPreview()" style="padding: 5px 12px; cursor: pointer;">🔄 Refresh</button>
+    <div id="viewProfile" class="view">
+      <div class="profile-card">
+        <img id="profileAvatar" class="avatar-lg" src="https://via.placeholder.com/100" alt="Profile Photo">
+        
+        <div class="file-upload-btn" id="avatarUploadContainer">
+          📁 Change Photo (Base64)
+          <input type="file" id="avatarInput" accept="image/*">
+        </div>
+
+        <input type="text" id="profileName" placeholder="Your Display Name" style="margin-bottom: 10px;">
+        <textarea id="profileBio" placeholder="Tell us about yourself..." style="height: 80px; margin-bottom: 15px;"></textarea>
+        
+        <button class="btn-primary" id="btnSaveProfile" onclick="saveProfile()">Save Profile</button>
       </div>
-      <iframe id="previewFrame" sandbox="allow-scripts allow-same-origin allow-modals allow-forms"></iframe>
     </div>
-  </div>
+  </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } 
-      from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // YOUR FIREBASE CONFIGURATION
+    // 1. YOUR FIREBASE CONFIGURATION
     const firebaseConfig = {
       apiKey: "AIzaSyDHalkE8dB7TycHSrBrkZ65fZ_G6aE465c",
       authDomain: "emulator-35ec5.firebaseapp.com",
@@ -117,132 +173,215 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Auth Elements
-    const authOverlay = document.getElementById('authOverlay');
-    const authEmail = document.getElementById('authEmail');
-    const authPassword = document.getElementById('authPassword');
-    const authError = document.getElementById('authError');
-    const userDisplay = document.getElementById('userDisplay');
+    // Global App State
+    let currentUser = null;
+    let isGuestMode = false;
+    let base64Avatar = "";
 
-    // Handle Auth State
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        authOverlay.style.display = 'none';
-        userDisplay.innerText = user.email;
-      } else {
-        authOverlay.style.display = 'flex';
+    // DOM Elements
+    const authModal = document.getElementById('authModal');
+    const guestBanner = document.getElementById('guestBanner');
+    const navAvatar = document.getElementById('navAvatar');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileName = document.getElementById('profileName');
+    const profileBio = document.getElementById('profileBio');
+
+    // Authentication Listeners
+    document.getElementById('btnLoginGoogle').onclick = async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (err) { alert(err.message); }
+    };
+
+    document.getElementById('btnLoginGuest').onclick = () => {
+      isGuestMode = true;
+      currentUser = { uid: "guest", displayName: "Guest User", photoURL: "https://via.placeholder.com/100" };
+      setupUIForUser();
+    };
+
+    document.getElementById('btnLogout').onclick = () => {
+      signOut(auth);
+      location.reload();
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user && !isGuestMode) {
+        currentUser = user;
+        await loadUserProfile();
+        setupUIForUser();
       }
     });
 
-    // Login
-    document.getElementById('btnLogin').onclick = async () => {
-      try {
-        await signInWithEmailAndPassword(auth, authEmail.value, authPassword.value);
-        authError.innerText = '';
-      } catch (err) {
-        authError.innerText = err.message;
+    function setupUIForUser() {
+      authModal.style.display = 'none';
+      if (isGuestMode) {
+        guestBanner.style.display = 'block';
+        document.getElementById('btnPublish').disabled = true;
+        document.getElementById('btnPublish').innerText = "Publishing Disabled in Guest Mode";
+        document.getElementById('btnSaveProfile').disabled = true;
+        document.getElementById('avatarUploadContainer').style.display = 'none';
       }
-    };
+      navAvatar.src = base64Avatar || currentUser.photoURL || "https://via.placeholder.com/32";
+      loadHomeFeed();
+      loadShortsFeed();
+    }
 
-    // Sign Up
-    document.getElementById('btnSignup').onclick = async () => {
-      try {
-        await createUserWithEmailAndPassword(auth, authEmail.value, authPassword.value);
-        authError.innerText = '';
-      } catch (err) {
-        authError.innerText = err.message;
-      }
-    };
+    // BASE64 IMAGE ENCODING FOR PROFILE
+    document.getElementById('avatarInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
 
-    // Logout
-    document.getElementById('btnLogout').onclick = () => signOut(auth);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        base64Avatar = reader.result; // Base64 Encoded Data String
+        profileAvatar.src = base64Avatar;
+        navAvatar.src = base64Avatar;
+      };
+      reader.readAsDataURL(file);
+    });
 
-    // Virtual File System State
-    let fileMap = {};
-    const previewFrame = document.getElementById('previewFrame');
-    const previewStatus = document.getElementById('previewStatus');
-
-    // Switch Tabs
-    window.switchTab = (tab) => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      
-      if (tab === 'paste') {
-        event.target.classList.add('active');
-        document.getElementById('panelPaste').classList.add('active');
+    // PROFILE MANAGEMENT (Firestore)
+    async function loadUserProfile() {
+      if (!currentUser || isGuestMode) return;
+      const ref = doc(db, "users", currentUser.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        profileName.value = data.displayName || "";
+        profileBio.value = data.bio || "";
+        if (data.avatarBase64) {
+          base64Avatar = data.avatarBase64;
+          profileAvatar.src = base64Avatar;
+        }
       } else {
-        event.target.classList.add('active');
-        document.getElementById('panelFolder').classList.add('active');
+        profileName.value = currentUser.displayName || "";
       }
+    }
+
+    window.saveProfile = async () => {
+      if (isGuestMode) return;
+      await setDoc(doc(db, "users", currentUser.uid), {
+        displayName: profileName.value,
+        bio: profileBio.value,
+        avatarBase64: base64Avatar
+      }, { merge: true });
+      alert("Profile Saved!");
     };
 
-    // 1. Run Pasted Raw Code
-    window.runPastedCode = () => {
-      const code = document.getElementById('codeEditor').value;
+    // TAB NAVIGATION
+    window.switchTab = (tabName) => {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      
+      document.getElementById(`view${tabName}`).classList.add('active');
+      event.target.classList.add('active');
+    };
+
+    // LIVE EDITOR PREVIEW
+    window.updatePreview = () => {
+      const code = document.getElementById('postCode').value;
+      const iframe = document.getElementById('editorPreview');
       const blob = new Blob([code], { type: 'text/html' });
-      previewFrame.src = URL.createObjectURL(blob);
-      previewStatus.innerText = "Status: Running Pasted Code";
+      iframe.src = URL.createObjectURL(blob);
     };
 
-    // 2. Multi-file & Folder Upload Handler
-    document.getElementById('folderInput').addEventListener('change', (e) => {
-      const files = e.target.files;
-      const fileTree = document.getElementById('fileTree');
-      fileTree.innerHTML = '';
-      fileMap = {};
+    // PUBLISH PROJECT TO FIRESTORE
+    window.publishProject = async () => {
+      if (isGuestMode) return alert("Guest users cannot upload projects!");
+      const title = document.getElementById('postTitle').value;
+      const desc = document.getElementById('postDesc').value;
+      const code = document.getElementById('postCode').value;
 
-      if (files.length === 0) return;
+      if (!title || !code) return alert("Title and Code are required!");
 
-      Array.from(files).forEach(file => {
-        // Normalize file paths
-        const path = file.webkitRelativePath.split('/').slice(1).join('/');
-        fileMap[path] = file;
-
-        const div = document.createElement('div');
-        div.className = 'file-item';
-        div.innerText = `📄 ${path}`;
-        fileTree.appendChild(div);
+      await addDoc(collection(db, "projects"), {
+        title,
+        desc,
+        code,
+        author: profileName.value || currentUser.displayName || "Anonymous",
+        authorAvatar: base64Avatar || currentUser.photoURL || "https://via.placeholder.com/32",
+        createdAt: new Date().toISOString()
       });
 
-      previewStatus.innerText = `Loaded ${files.length} files into memory.`;
-    });
+      alert("Project Published!");
+      switchTab('Home');
+      loadHomeFeed();
+      loadShortsFeed();
+    };
 
-    // 3. Launch Multi-File Web Project
-    window.runFolderProject = async () => {
-      let entryPoint = fileMap['index.html'];
+    // LOAD HOME GRID FEED
+    async function loadHomeFeed() {
+      const grid = document.getElementById('homeFeedGrid');
+      grid.innerHTML = "";
       
-      // If index.html isn't root, look for any .html file
-      if (!entryPoint) {
-        const key = Object.keys(fileMap).find(k => k.endsWith('.html'));
-        if (key) entryPoint = fileMap[key];
-      }
-
-      if (!entryPoint) {
-        alert("No entry html file (e.g., index.html) found in this folder!");
-        return;
-      }
-
-      // Read index.html and link relative assets via Blob URLs
-      let content = await entryPoint.text();
-
-      for (const [path, file] of Object.entries(fileMap)) {
-        if (path !== entryPoint.name) {
-          const blobUrl = URL.createObjectURL(file);
-          // Replace local asset references with in-memory Blob URLs
-          content = content.replaceAll(`"${path}"`, `"${blobUrl}"`);
-          content = content.replaceAll(`'${path}'`, `'${blobUrl}'`);
+      try {
+        const snap = await getDocs(collection(db, "projects"));
+        if(snap.empty) {
+          grid.innerHTML = "<p>No posts found. Be the first to publish!</p>";
+          return;
         }
-      }
 
-      const finalBlob = new Blob([content], { type: 'text/html' });
-      previewFrame.src = URL.createObjectURL(finalBlob);
-      previewStatus.innerText = `Status: Running ${entryPoint.name}`;
-    };
+        snap.forEach(doc => {
+          const data = doc.data();
+          const card = document.createElement('div');
+          card.className = "project-card";
+          
+          // Create Blob URL for iframe frame sandbox
+          const blob = new Blob([data.code], { type: 'text/html' });
+          const blobUrl = URL.createObjectURL(blob);
 
-    window.reloadPreview = () => {
-      previewFrame.contentWindow.location.reload();
-    };
+          card.innerHTML = `
+            <div class="card-header">
+              <img src="${data.authorAvatar}" class="avatar-sm">
+              <div>
+                <strong>${data.author}</strong>
+              </div>
+            </div>
+            <div class="card-body">
+              <h3>${data.title}</h3>
+              <p>${data.desc}</p>
+              <iframe class="card-preview" src="${blobUrl}" sandbox="allow-scripts"></iframe>
+            </div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch(e) { grid.innerHTML = "Error loading feed."; }
+    }
+
+    // LOAD YOUTUBE SHORTS STYLE FEED
+    async function loadShortsFeed() {
+      const container = document.getElementById('shortsContainer');
+      container.innerHTML = "";
+
+      try {
+        const snap = await getDocs(collection(db, "projects"));
+        snap.forEach(doc => {
+          const data = doc.data();
+          const blob = new Blob([data.code], { type: 'text/html' });
+          const blobUrl = URL.createObjectURL(blob);
+
+          const short = document.createElement('div');
+          short.className = "short-container";
+          short.innerHTML = `
+            <div class="short-card">
+              <iframe class="short-frame" src="${blobUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+              <div class="short-overlay">
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                  <img src="${data.authorAvatar}" class="avatar-sm">
+                  <strong>${data.author}</strong>
+                </div>
+                <h3>${data.title}</h3>
+                <p style="font-size:0.85rem; opacity:0.8;">${data.desc}</p>
+              </div>
+            </div>
+          `;
+          container.appendChild(short);
+        });
+      } catch(e) { console.error(e); }
+    }
   </script>
 </body>
 </html>
