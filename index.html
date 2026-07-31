@@ -1,97 +1,152 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-  // YOUR ACTUAL FIREBASE CONFIGURATION
-  const firebaseConfig = {
-    apiKey: "AIzaSyDHalkE8dB7TycHSrBrkZ65fZ_G6aE465c",
-    authDomain: "emulator-35ec5.firebaseapp.com",
-    projectId: "emulator-35ec5",
-    storageBucket: "emulator-35ec5.firebasestorage.app",
-    messagingSenderId: "358755516525",
-    appId: "1:358755516525:web:625eaa8b32199563b4bf64",
-    measurementId: "G-TB9F8QHG12"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const storage = getStorage(app);
-
-  const fileInput = document.getElementById('fileInput');
-  const appList = document.getElementById('appList');
-  const emulator = document.getElementById('emulator');
-  const currentTitle = document.getElementById('currentTitle');
-
-  // Load existing uploaded files from Storage
-  async function loadFiles() {
-    appList.innerHTML = '<p style="font-size:0.8rem; color:#888;">Loading files...</p>';
-    const storageRef = ref(storage, 'html_apps/');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML App & Game Emulator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #fff; height: 100vh; display: flex; }
     
-    try {
-      const result = await listAll(storageRef);
-      appList.innerHTML = '';
+    /* Sidebar Layout */
+    .sidebar { width: 320px; background: #1e1e1e; border-right: 1px solid #333; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+    .sidebar h2 { font-size: 1.2rem; color: #ffca28; }
+    
+    /* Upload Box */
+    .upload-box { border: 2px dashed #444; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+    .upload-box:hover { border-color: #ffca28; background: #252525; }
+    input[type="file"] { display: none; }
 
-      if (result.items.length === 0) {
-        appList.innerHTML = '<p style="font-size:0.8rem; color:#888;">No files uploaded yet.</p>';
+    /* App List */
+    .app-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .app-item { background: #2a2a2a; padding: 12px; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+    .app-item:hover { background: #383838; }
+    .app-item.active { border-left: 4px solid #ffca28; background: #333; }
+
+    /* Emulator Display Area */
+    .viewport { flex: 1; display: flex; flex-direction: column; background: #000; }
+    .toolbar { background: #1e1e1e; padding: 10px 20px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+    iframe { width: 100%; height: 100%; border: none; background: #fff; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>HTML Playground</h2>
+    
+    <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+      <p>📁 Click to upload <code>.html</code> file</p>
+      <input type="file" id="fileInput" accept=".html">
+    </div>
+
+    <h3>Uploaded Games & Apps</h3>
+    <div class="app-list" id="appList">
+      </div>
+  </div>
+
+  <div class="viewport">
+    <div class="toolbar">
+      <span id="currentTitle">Select or upload a file to run...</span>
+      <button onclick="reloadEmulator()" style="padding: 5px 10px; cursor: pointer;">🔄 Reload</button>
+    </div>
+    <iframe id="emulator" sandbox="allow-scripts allow-same-origin allow-modals allow-forms"></iframe>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL, listAll } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+    // YOUR FIREBASE CONFIGURATION
+    const firebaseConfig = {
+      apiKey: "AIzaSyDHalkE8dB7TycHSrBrkZ65fZ_G6aE465c",
+      authDomain: "emulator-35ec5.firebaseapp.com",
+      projectId: "emulator-35ec5",
+      storageBucket: "emulator-35ec5.firebasestorage.app",
+      messagingSenderId: "358755516525",
+      appId: "1:358755516525:web:625eaa8b32199563b4bf64",
+      measurementId: "G-TB9F8QHG12"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+
+    const fileInput = document.getElementById('fileInput');
+    const appList = document.getElementById('appList');
+    const emulator = document.getElementById('emulator');
+    const currentTitle = document.getElementById('currentTitle');
+
+    // Load existing uploaded files from Storage
+    async function loadFiles() {
+      appList.innerHTML = '<p style="font-size:0.8rem; color:#888;">Loading files...</p>';
+      const storageRef = ref(storage, 'html_apps/');
+      
+      try {
+        const result = await listAll(storageRef);
+        appList.innerHTML = '';
+
+        if (result.items.length === 0) {
+          appList.innerHTML = '<p style="font-size:0.8rem; color:#888;">No files uploaded yet.</p>';
+          return;
+        }
+
+        for (const itemRef of result.items) {
+          const url = await getDownloadURL(itemRef);
+          createAppItem(itemRef.name, url);
+        }
+      } catch (err) {
+        console.error("Error loading files: ", err);
+      }
+    }
+
+    // Render an app item to the side list
+    function createAppItem(fileName, url) {
+      const item = document.createElement('div');
+      item.className = 'app-item';
+      item.innerText = fileName;
+      item.onclick = () => launchApp(fileName, url, item);
+      appList.appendChild(item);
+    }
+
+    // Run selected HTML in the iframe sandbox
+    function launchApp(fileName, url, element) {
+      document.querySelectorAll('.app-item').forEach(el => el.classList.remove('active'));
+      if(element) element.classList.add('active');
+      
+      currentTitle.innerText = `Running: ${fileName}`;
+      emulator.src = url;
+    }
+
+    // Upload new HTML file to Firebase Storage
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.name.endsWith('.html')) {
+        alert('Please upload a valid .html file!');
         return;
       }
 
-      for (const itemRef of result.items) {
-        const url = await getDownloadURL(itemRef);
-        createAppItem(itemRef.name, url);
+      const metadata = { contentType: 'text/html' };
+      const fileRef = ref(storage, `html_apps/${Date.now()}_${file.name}`);
+
+      try {
+        currentTitle.innerText = 'Uploading file...';
+        await uploadBytes(fileRef, file, metadata);
+        
+        currentTitle.innerText = 'Upload successful!';
+        loadFiles();
+      } catch (err) {
+        console.error("Upload failed:", err);
+        alert("Upload failed. Make sure Storage is enabled in Firebase Console.");
       }
-    } catch (err) {
-      console.error("Error loading files: ", err);
-    }
-  }
+    });
 
-  // Render an app item to the side list
-  function createAppItem(fileName, url) {
-    const item = document.createElement('div');
-    item.className = 'app-item';
-    item.innerText = fileName;
-    item.onclick = () => launchApp(fileName, url, item);
-    appList.appendChild(item);
-  }
+    window.reloadEmulator = () => {
+      emulator.contentWindow.location.reload();
+    };
 
-  // Run selected HTML in the iframe sandbox
-  function launchApp(fileName, url, element) {
-    document.querySelectorAll('.app-item').forEach(el => el.classList.remove('active'));
-    if (element) element.classList.add('active');
-    
-    currentTitle.innerText = `Running: ${fileName}`;
-    emulator.src = url;
-  }
-
-  // Upload new HTML file to Firebase Storage
-  fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    if (!file.name.endsWith('.html')) {
-      alert('Please upload a valid .html file!');
-      return;
-    }
-
-    const metadata = { contentType: 'text/html' };
-    const fileRef = ref(storage, `html_apps/${Date.now()}_${file.name}`);
-
-    try {
-      currentTitle.innerText = 'Uploading file...';
-      await uploadBytes(fileRef, file, metadata);
-      await getDownloadURL(fileRef);
-      
-      currentTitle.innerText = 'Upload successful!';
-      loadFiles(); // Refresh list
-    } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Upload failed. Make sure Firebase Storage is enabled in your console!");
-    }
-  });
-
-  window.reloadEmulator = () => {
-    emulator.contentWindow.location.reload();
-  };
-
-  loadFiles();
-</script>
+    loadFiles();
+  </script>
+</body>
+</html>
