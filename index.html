@@ -13,6 +13,7 @@
       --text: #f1f2f6;
       --text-muted: #a4b0be;
       --border: #2f3542;
+      --danger: #ff4757;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -39,7 +40,7 @@
     .auth-error { color: #ff5252; font-size: 0.8rem; margin-top: 8px; min-height: 18px; word-break: break-word; }
 
     /* NAVBAR */
-    header { height: 60px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+    header { height: 60px; background: var(--card-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 10; }
     .logo { font-weight: bold; font-size: 1.2rem; color: var(--accent); }
     nav { display: flex; gap: 10px; }
     .nav-btn { background: transparent; border: none; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
@@ -52,14 +53,19 @@
     .view { display: none; height: 100%; overflow-y: auto; padding: 20px; }
     .view.active { display: block; }
 
-    /* GRID FEED (HOME) */
+    /* GRID FEED (RECOMMENDED HOME) */
+    .section-header { max-width: 1200px; margin: 0 auto 20px; }
+    .section-header h2 { font-size: 1.5rem; color: var(--text); }
     .feed-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
-    .project-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
-    .card-header { padding: 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+    .project-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .card-header { padding: 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .card-user-info { display: flex; align-items: center; gap: 10px; }
     .card-body { padding: 15px; flex: 1; }
     .card-body h3 { margin-bottom: 6px; }
     .card-body p { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px; }
+    .card-preview-wrapper { position: relative; width: 100%; }
     .card-preview { height: 200px; width: 100%; border: none; background: #fff; border-radius: 6px; }
+    .btn-fullscreen { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 4px; padding: 5px 8px; cursor: pointer; font-size: 0.8rem; }
 
     /* SHORTS FEED */
     #viewShorts { padding: 0; scroll-snap-type: y mandatory; overflow-y: scroll; height: 100%; }
@@ -67,17 +73,35 @@
     .short-card { width: 100%; max-width: 450px; height: 90%; background: var(--card-bg); border-radius: 12px; overflow: hidden; position: relative; display: flex; flex-direction: column; border: 1px solid var(--border); }
     .short-frame { flex: 1; width: 100%; border: none; background: #fff; }
     .short-overlay { position: absolute; bottom: 0; inset-x: 0; background: linear-gradient(transparent, rgba(0,0,0,0.9)); padding: 20px; color: #fff; pointer-events: none; }
+    
+    /* SHORTS ACTION SIDEBAR */
+    .short-actions { position: absolute; right: 15px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; z-index: 5; }
+    .action-btn { background: rgba(0,0,0,0.6); border: 1px solid var(--border); color: #fff; width: 45px; height: 45px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; transition: 0.2s; }
+    .action-btn:hover { background: var(--accent); }
+    .action-btn span { font-size: 0.7rem; }
+
+    /* COMMENTS PANEL */
+    .comments-drawer { position: absolute; bottom: 0; inset-x: 0; background: var(--card-bg); border-top: 1px solid var(--border); height: 50%; display: none; flex-direction: column; padding: 15px; z-index: 10; }
+    .comments-drawer.open { display: flex; }
+    .comments-list { flex: 1; overflow-y: auto; margin: 10px 0; font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px; }
+    .comment-item { background: #121216; padding: 8px 12px; border-radius: 6px; }
 
     /* UPLOAD FORM */
     .editor-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
     textarea.code-input { font-family: monospace; height: 250px; background: #121216; color: #a6e22e; width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; }
     .preview-box { height: 250px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
 
-    /* PROFILE VIEW */
-    .profile-card { max-width: 500px; margin: 20px auto; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; text-align: center; }
+    /* PROFILE & MY PROJECTS */
+    .profile-container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 30px; }
+    .profile-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 25px; text-align: center; }
     .avatar-lg { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid var(--accent); }
     .file-upload-btn { position: relative; overflow: hidden; display: inline-block; background: var(--border); padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 15px; font-size: 0.85rem; }
     .file-upload-btn input { position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+    .my-projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .my-project-item { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .btn-danger { background: var(--danger); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    .btn-secondary { background: var(--border); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
 
     .btn-primary { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; }
     .btn-primary:hover { background: var(--accent-hover); }
@@ -86,7 +110,7 @@
 </head>
 <body>
 
-  <div id="guestBanner" class="guest-banner">👀 Viewing in Guest Mode (Uploading disabled)</div>
+  <div id="guestBanner" class="guest-banner">👀 Viewing in Guest Mode (Uploading & actions disabled)</div>
 
   <div class="auth-overlay" id="authModal">
     <div class="auth-card">
@@ -136,8 +160,11 @@
 
   <main>
     <div id="viewHome" class="view active">
+      <div class="section-header">
+        <h2>🔥 Recommended for You</h2>
+      </div>
       <div class="feed-grid" id="homeFeedGrid">
-        <p style="color:var(--text-muted)">Loading feed...</p>
+        <p style="color:var(--text-muted)">Loading recommended projects...</p>
       </div>
     </div>
 
@@ -167,18 +194,27 @@
     </div>
 
     <div id="viewProfile" class="view">
-      <div class="profile-card">
-        <img id="profileAvatar" class="avatar-lg" src="https://via.placeholder.com/100" alt="Profile Photo">
-        
-        <div class="file-upload-btn" id="avatarUploadContainer">
-          📁 Change Photo (Base64)
-          <input type="file" id="avatarInput" accept="image/*">
+      <div class="profile-container">
+        <div class="profile-card">
+          <img id="profileAvatar" class="avatar-lg" src="https://via.placeholder.com/100" alt="Profile Photo">
+          
+          <div class="file-upload-btn" id="avatarUploadContainer">
+            📁 Change Photo (Base64)
+            <input type="file" id="avatarInput" accept="image/*">
+          </div>
+
+          <input type="text" id="profileName" placeholder="Your Display Name" style="width:100%; padding:10px; margin-bottom:10px; background:#121216; border:1px solid var(--border); border-radius:6px; color:#fff;">
+          <textarea id="profileBio" placeholder="Tell us about yourself..." style="width:100%; height: 80px; padding:10px; margin-bottom:15px; background:#121216; border:1px solid var(--border); border-radius:6px; color:#fff;"></textarea>
+          
+          <button class="btn-primary" id="btnSaveProfile" onclick="saveProfile()">Save Profile Settings</button>
         </div>
 
-        <input type="text" id="profileName" placeholder="Your Display Name" style="width:100%; padding:10px; margin-bottom:10px; background:#121216; border:1px solid var(--border); border-radius:6px; color:#fff;">
-        <textarea id="profileBio" placeholder="Tell us about yourself..." style="width:100%; height: 80px; padding:10px; margin-bottom:15px; background:#121216; border:1px solid var(--border); border-radius:6px; color:#fff;"></textarea>
-        
-        <button class="btn-primary" id="btnSaveProfile" onclick="saveProfile()">Save Profile</button>
+        <div>
+          <h2 style="margin-bottom: 15px;">📁 My Projects</h2>
+          <div class="my-projects-grid" id="myProjectsGrid">
+            <p style="color:var(--text-muted)">Loading your projects...</p>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -186,7 +222,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDHalkE8dB7TycHSrBrkZ65fZ_G6aE465c",
@@ -204,6 +240,7 @@
     let currentUser = null;
     let isGuestMode = false;
     let base64Avatar = "";
+    let lastPostTime = 0; // Anti-spam tracking
 
     const authModal = document.getElementById('authModal');
     const authError = document.getElementById('authError');
@@ -238,9 +275,15 @@
       }
     };
 
-    // 2. Email Signup
+    // 2. Email Signup with Anti-Spam Cooldown
     document.getElementById('btnSignupEmail').onclick = async () => {
       authError.innerText = "";
+      
+      const lastCreation = localStorage.getItem('last_acc_create');
+      if (lastCreation && Date.now() - parseInt(lastCreation) < 60000) {
+        return authError.innerText = "Please wait 60 seconds before creating another account.";
+      }
+
       const name = document.getElementById('signupName').value;
       const email = document.getElementById('signupEmail').value;
       const pass = document.getElementById('signupPassword').value;
@@ -249,6 +292,7 @@
 
       try {
         const res = await createUserWithEmailAndPassword(auth, email, pass);
+        localStorage.setItem('last_acc_create', Date.now().toString());
         await updateProfile(res.user, { displayName: name });
         await setDoc(doc(db, "users", res.user.uid), { displayName: name, bio: "", avatarBase64: "" });
       } catch (err) {
@@ -309,6 +353,7 @@
       navAvatar.src = base64Avatar || currentUser.photoURL || "https://via.placeholder.com/32";
       loadHomeFeed();
       loadShortsFeed();
+      loadMyProjects();
     }
 
     // Base64 Photo Processing
@@ -369,6 +414,8 @@
       
       document.getElementById(`view${tabName}`).classList.add('active');
       event.target.classList.add('active');
+
+      if (tabName === 'Profile') loadMyProjects();
     };
 
     window.updatePreview = () => {
@@ -378,10 +425,16 @@
       iframe.src = URL.createObjectURL(blob);
     };
 
-    // FIXED PUBLISH FUNCTION WITH ERROR HANDLING
+    // PUBLISH PROJECT WITH ANTI-SPAM POST COOLDOWN
     window.publishProject = async () => {
       if (isGuestMode) return alert("Guest users cannot upload projects!");
       
+      // Post cooldown check (30 seconds)
+      if (Date.now() - lastPostTime < 30000) {
+        const remaining = Math.ceil((30000 - (Date.now() - lastPostTime)) / 1000);
+        return alert(`Anti-Spam Cooldown: Please wait ${remaining}s before posting again.`);
+      }
+
       const title = document.getElementById('postTitle').value;
       const desc = document.getElementById('postDesc').value;
       const code = document.getElementById('postCode').value;
@@ -397,11 +450,15 @@
           title: title,
           desc: desc,
           code: code,
+          uid: currentUser.uid,
           author: profileName.value || currentUser.displayName || "Anonymous",
           authorAvatar: base64Avatar || currentUser.photoURL || "https://via.placeholder.com/32",
+          likes: [],
+          comments: [],
           createdAt: new Date().toISOString()
         });
 
+        lastPostTime = Date.now();
         alert("🎉 Project Published!");
         
         document.getElementById('postTitle').value = "";
@@ -414,14 +471,20 @@
 
       } catch (error) {
         console.error("Publishing error:", error);
-        alert("Publish failed: " + error.message + "\n\nMake sure your Firestore Rules are set to 'allow read, write: if true;'");
+        alert("Publish failed: " + error.message);
       } finally {
         btn.innerText = "🚀 Publish to Feed";
         btn.disabled = false;
       }
     };
 
-    // Load Grid View
+    // FULLSCREEN PREVIEW TOGGLE
+    window.openFullscreen = (blobUrl) => {
+      const win = window.open();
+      win.document.write(`<iframe src="${blobUrl}" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+    };
+
+    // LOAD HOME GRID FEED
     async function loadHomeFeed() {
       const grid = document.getElementById('homeFeedGrid');
       grid.innerHTML = "";
@@ -443,40 +506,65 @@
 
           card.innerHTML = `
             <div class="card-header">
-              <img src="${data.authorAvatar}" class="avatar-sm">
-              <div><strong>${data.author}</strong></div>
+              <div class="card-user-info">
+                <img src="${data.authorAvatar}" class="avatar-sm">
+                <strong>${data.author}</strong>
+              </div>
             </div>
             <div class="card-body">
               <h3>${data.title}</h3>
               <p>${data.desc}</p>
-              <iframe class="card-preview" src="${blobUrl}" sandbox="allow-scripts"></iframe>
+              <div class="card-preview-wrapper">
+                <iframe class="card-preview" src="${blobUrl}" sandbox="allow-scripts"></iframe>
+                <button class="btn-fullscreen" onclick="openFullscreen('${blobUrl}')">⛶ Fullscreen</button>
+              </div>
             </div>
           `;
           grid.appendChild(card);
         });
       } catch(e) { 
         console.error("Home feed error:", e);
-        grid.innerHTML = "<p style='color:#ff5252;'>Error loading feed. Check Firestore permissions.</p>"; 
+        grid.innerHTML = "<p style='color:#ff5252;'>Error loading feed.</p>"; 
       }
     }
 
-    // Load Shorts Feed
+    // LOAD SHORTS FEED WITH LIKES & COMMENTS
     async function loadShortsFeed() {
       const container = document.getElementById('shortsContainer');
       container.innerHTML = "";
 
       try {
         const snap = await getDocs(collection(db, "projects"));
-        snap.forEach(doc => {
-          const data = doc.data();
+        snap.forEach(docSnap => {
+          const data = docSnap.data();
+          const projectId = docSnap.id;
           const blob = new Blob([data.code], { type: 'text/html' });
           const blobUrl = URL.createObjectURL(blob);
+
+          const likes = data.likes || [];
+          const comments = data.comments || [];
+          const isLiked = currentUser ? likes.includes(currentUser.uid) : false;
 
           const short = document.createElement('div');
           short.className = "short-container";
           short.innerHTML = `
             <div class="short-card">
               <iframe class="short-frame" src="${blobUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+              
+              <div class="short-actions">
+                <button class="action-btn" onclick="toggleLike('${projectId}', ${isLiked})">
+                  ${isLiked ? '❤️' : '🤍'}
+                  <span>${likes.length}</span>
+                </button>
+                <button class="action-btn" onclick="toggleComments('${projectId}')">
+                  💬
+                  <span>${comments.length}</span>
+                </button>
+                <button class="action-btn" onclick="openFullscreen('${blobUrl}')">
+                  ⛶
+                </button>
+              </div>
+
               <div class="short-overlay">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
                   <img src="${data.authorAvatar}" class="avatar-sm">
@@ -485,12 +573,135 @@
                 <h3>${data.title}</h3>
                 <p style="font-size:0.85rem; opacity:0.8;">${data.desc}</p>
               </div>
+
+              <div class="comments-drawer" id="comments-${projectId}">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <strong>Comments</strong>
+                  <span style="cursor:pointer;" onclick="toggleComments('${projectId}')">✕</span>
+                </div>
+                <div class="comments-list" id="comment-list-${projectId}">
+                  ${comments.map(c => `<div class="comment-item"><strong>${c.author}:</strong> ${c.text}</div>`).join('')}
+                </div>
+                <div style="display:flex; gap:6px;">
+                  <input type="text" id="comment-input-${projectId}" placeholder="Add comment..." style="flex:1; padding:6px; background:#121216; border:1px solid var(--border); border-radius:4px; color:#fff;">
+                  <button class="btn-primary" onclick="addComment('${projectId}')">Send</button>
+                </div>
+              </div>
             </div>
           `;
           container.appendChild(short);
         });
       } catch(e) { console.error("Shorts error:", e); }
     }
+
+    // LIKE TOGGLE
+    window.toggleLike = async (projectId, isLiked) => {
+      if (isGuestMode) return alert("Guest users cannot like posts!");
+      const ref = doc(db, "projects", projectId);
+      await updateDoc(ref, {
+        likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
+      });
+      loadShortsFeed();
+    };
+
+    // COMMENT TRAY TOGGLE & ADD
+    window.toggleComments = (projectId) => {
+      const drawer = document.getElementById(`comments-${projectId}`);
+      drawer.classList.toggle('open');
+    };
+
+    window.addComment = async (projectId) => {
+      if (isGuestMode) return alert("Guest users cannot comment!");
+      const input = document.getElementById(`comment-input-${projectId}`);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const ref = doc(db, "projects", projectId);
+      await updateDoc(ref, {
+        comments: arrayUnion({
+          author: profileName.value || currentUser.displayName || "User",
+          text: text
+        })
+      });
+      input.value = "";
+      loadShortsFeed();
+    };
+
+    // MY PROJECTS VIEW (PROFILE EDIT/DELETE)
+    async function loadMyProjects() {
+      const container = document.getElementById('myProjectsGrid');
+      if (!currentUser || isGuestMode) {
+        container.innerHTML = "<p>Sign in to view your projects.</p>";
+        return;
+      }
+
+      container.innerHTML = "<p>Loading your projects...</p>";
+
+      try {
+        const snap = await getDocs(collection(db, "projects"));
+        container.innerHTML = "";
+        
+        let found = false;
+        snap.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.uid === currentUser.uid) {
+            found = true;
+            const projectId = docSnap.id;
+            
+            const item = document.createElement('div');
+            item.className = 'my-project-item';
+            item.innerHTML = `
+              <input type="text" id="edit-title-${projectId}" value="${data.title}" style="padding:6px; background:#121216; border:1px solid var(--border); color:#fff; border-radius:4px;">
+              <textarea id="edit-desc-${projectId}" style="padding:6px; background:#121216; border:1px solid var(--border); color:#fff; border-radius:4px; height:50px;">${data.desc}</textarea>
+              <textarea id="edit-code-${projectId}" style="padding:6px; background:#121216; border:1px solid var(--border); color:#a6e22e; font-family:monospace; border-radius:4px; height:80px;">${data.code}</textarea>
+              <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:5px;">
+                <button class="btn-secondary" onclick="updateProject('${projectId}')">✏️ Save Changes</button>
+                <button class="btn-danger" onclick="deleteProject('${projectId}')">🗑️ Delete</button>
+              </div>
+            `;
+            container.appendChild(item);
+          }
+        });
+
+        if (!found) container.innerHTML = "<p style='color:var(--text-muted)'>You haven't uploaded any projects yet.</p>";
+      } catch (e) {
+        container.innerHTML = "<p style='color:#ff5252'>Error loading projects.</p>";
+      }
+    }
+
+    // UPDATE PROJECT
+    window.updateProject = async (projectId) => {
+      const newTitle = document.getElementById(`edit-title-${projectId}`).value;
+      const newDesc = document.getElementById(`edit-desc-${projectId}`).value;
+      const newCode = document.getElementById(`edit-code-${projectId}`).value;
+
+      try {
+        await updateDoc(doc(db, "projects", projectId), {
+          title: newTitle,
+          desc: newDesc,
+          code: newCode
+        });
+        alert("Project updated!");
+        loadHomeFeed();
+        loadShortsFeed();
+      } catch (e) {
+        alert("Update failed: " + e.message);
+      }
+    };
+
+    // DELETE PROJECT
+    window.deleteProject = async (projectId) => {
+      if (!confirm("Are you sure you want to delete this project?")) return;
+      try {
+        await deleteDoc(doc(db, "projects", projectId));
+        alert("Project deleted!");
+        loadMyProjects();
+        loadHomeFeed();
+        loadShortsFeed();
+      } catch (e) {
+        alert("Delete failed: " + e.message);
+      }
+    };
   </script>
 </body>
 </html>
